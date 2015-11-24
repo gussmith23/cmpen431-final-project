@@ -21,36 +21,36 @@ import os
 # The values should each map to a single line; i.e., if we use this
 #	dictionary to find-and-replace a setting, we won't overwrite
 #	multiple lines.
-simplesim_settings = {
-	ifqsize: 	"-fetch:ifqsize",
-	fspeed: 	"-fetch:speed",
-	fmplat:		"-fetch:mplat",
-	bpred:		"-bpred ",		# This one may be an issue...
-	ras:		"-bpred:ras",
-	dwidth:		"-decode:width",
-	iwidth:		"-issue:width",
-	inorder:	"-issue:inorder",
-	wrongpath:	"-issue:wrongpath",
-	ruusize:	"-ruu:size",
-	lsqsize:	"-lsq:size",
-	ialu:		"-res:ialu",
-	imult:		"-res:imult",
-	fpalu:		"-res:fpalu",
-	fpmult:		"-res:fpmult",
-	memport:	"-res:memport",
-	il1:		"-cache:il1 ",
-	il2:		"-cache:il2 ",
-	dl1:		"-cache:dl1 ",
-	dl2:		"-cache:dl2 ",
-	itlb:		"-tlb:itlb",
-	dtlb:		"-tbl:dtlb",
-	il1lat:		"-cache:il1lat",
-	il2lat:		"-cache:il2lat",
-	dl1lat:		"-cache:dl1lat",
-	dl2lat:		"-cache:dl2lat",
-	memlat:		"-mem:lat",
-	memwidth:	"-mem:width",
-	redir:		"-redir:sim"
+ss_settings = {
+	'ifqsize': 	"-fetch:ifqsize",
+	'fspeed': 	"-fetch:speed",
+	'fmplat':	"-fetch:mplat",
+	'bpred':	"-bpred ",		# This one may be an issue...
+	'ras':		"-bpred:ras",
+	'dwidth':	"-decode:width",
+	'iwidth':	"-issue:width",
+	'inorder':	"-issue:inorder",
+	'wrongpath':	"-issue:wrongpath",
+	'ruusize':	"-ruu:size",
+	'lsqsize':	"-lsq:size",
+	'ialu':		"-res:ialu",
+	'imult':	"-res:imult",
+	'fpalu':	"-res:fpalu",
+	'fpmult':	"-res:fpmult",
+	'memport':	"-res:memport",
+	'il1':		"-cache:il1 ",
+	'il2':		"-cache:il2 ",
+	'dl1':		"-cache:dl1 ",
+	'dl2':		"-cache:dl2 ",
+	'itlb':		"-tlb:itlb",
+	'dtlb':		"-tbl:dtlb",
+	'il1lat':	"-cache:il1lat",
+	'il2lat':	"-cache:il2lat",
+	'dl1lat':	"-cache:dl1lat",
+	'dl2lat':	"-cache:dl2lat",
+	'memlat':	"-mem:lat",
+	'memwidth':	"-mem:width",
+	'redir':	"-redir:sim"
 }
 
 
@@ -113,6 +113,21 @@ def modify_working_set(_working_set_dir, regexps):
 def merge_working_set(_cfg_dir, _working_set_dir):
 	command = "sh" + " " + base_dir + "/config-generator/merge-working-set.sh" + " " + base_dir + "/" + _cfg_dir + " "  + base_dir + "/" + _working_set_dir
 	os.system(command)
+
+
+## HELPER FUNCTIONS
+
+# 
+# Arguments:
+# name: string with one of the following vals:
+#	il1, il2, dl1, dl2, ul2
+#
+# see https://www.doc.ic.ac.uk/~phjk/AdvancedCompArchitecture/2001-02/Lectures/Ch03-Caches/node31.html
+#	for more documentation on cache settings.
+
+def create_cache_change_regex(name, nsets, bsize, assoc, repl):
+	setting_string = ss_settings[name]
+	return "/" + setting_string + "/c\\" + setting_string + " " + name + ":" + nsets + ":" + bsize + ":" + assoc + ":" + repl
 
 
 #######################
