@@ -6,6 +6,7 @@
 
 import subprocess
 import sys
+import os
 
 ########################
 ## FUNCTIONS
@@ -29,17 +30,30 @@ def new_working_set(_cfg_dir, _working_set_dir):
 #
 # Arguments:
 # _working_set_dir - the working set, relative to base of project.
+# regexps - an array of strings which will be passed to sed. for example,
+#		'/find me/c\\newstring' replaces lines containing "findme" with
+#		"newstring". Note the double backslash - it is technically
+#		just a single backslash, but it needs to be escaped in python.
 
 def modify_working_set(_working_set_dir, regexps):
-	
-	# Create command.
 	command = "sh" + " " + base_dir + "/config-generator/modify-working-set.sh" + " "  + base_dir + "/" + _working_set_dir
 	for regexp in regexps:
-		print(regexp)
 		command += " " + "\"" + regexp + "\""
+	os.system(command)
 
-	print(command)
-	subprocess.call(command.split())
+
+# merge_working_set
+#	Wrapper for merge-working-set.sh, which merges some working set back into
+#	the main config directory.
+#
+# Arguments:
+# _cfg_dir - the directory to merge into, relative to base of project.
+# _working_set_dir - the working set, relative to base of project.
+
+def merge_working_set(_cfg_dir, _working_set_dir):
+	command = "sh" + " " + base_dir + "/config-generator/merge-working-set.sh" + " " + base_dir + "/" + _cfg_dir + " "  + base_dir + "/" + _working_set_dir
+	os.system(command)
+
 
 #######################
 ## MAIN ROUTINE
@@ -50,6 +64,9 @@ cfg_dir = str(sys.argv[2])
 if not base_dir or not cfg_dir:
 	sys.exit(-1)
 
-new_working_set(cfg_dir,cfg_dir+"/pythtest")
-modify_working_set(cfg_dir+"/pythtest", ['/bpred/c\\found you!'])
+test_working_dir = cfg_dir + "/pythtest"
+
+new_working_set(cfg_dir,test_working_dir)
+modify_working_set(test_working_dir, ['/bpred/c\\found you!'])
+merge_working_set(cfg_dir, test_working_dir)
 	
