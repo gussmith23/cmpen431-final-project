@@ -127,7 +127,19 @@ def merge_working_set(_cfg_dir, _working_set_dir):
 
 def create_cache_change_regex(name, nsets, bsize, assoc, repl):
 	setting_string = ss_settings[name]
-	return "/" + setting_string + "/c\\" + setting_string + " " + name + ":" + nsets + ":" + bsize + ":" + assoc + ":" + repl
+	return "/" + setting_string + "/c\\" + setting_string + " " + name + ":" + str(nsets) + ":" + str(bsize) + ":" + str(assoc) + ":" + repl
+
+
+# create_ss_setting_change_regex 
+# Arguments:
+# name: setting name to be changed
+
+def create_setting_change_regex(name, vals):
+	setting_string = ss_settings[name]
+	regex =  "/" + setting_string + "/c\\" + setting_string 
+	for val in vals:
+		regex += " " + str(val)
+	return regex
 
 
 #######################
@@ -139,9 +151,12 @@ cfg_dir = str(sys.argv[2])
 if not base_dir or not cfg_dir:
 	sys.exit(-1)
 
-test_working_dir = cfg_dir + "/pythtest"
+working_set_dir = cfg_dir + "/test/"
 
-new_working_set(cfg_dir,test_working_dir)
-modify_working_set(test_working_dir, ['/bpred/c\\found you!'])
-merge_working_set(cfg_dir, test_working_dir)
-	
+new_working_set(cfg_dir, working_set_dir)
+
+regex = create_cache_change_regex("il1",1024,8,1,"l")
+modify_working_set(working_set_dir, [regex])
+
+merge_working_set(cfg_dir, working_set_dir)
+
