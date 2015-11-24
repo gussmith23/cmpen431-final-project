@@ -42,6 +42,7 @@ ss_settings = {
 	'il2':		"-cache:il2 ",
 	'dl1':		"-cache:dl1 ",
 	'dl2':		"-cache:dl2 ",
+	'ul2':		"-cache:dl2 ", # note this
 	'itlb':		"-tlb:itlb",
 	'dtlb':		"-tbl:dtlb",
 	'il1lat':	"-cache:il1lat",
@@ -151,12 +152,79 @@ cfg_dir = str(sys.argv[2])
 if not base_dir or not cfg_dir:
 	sys.exit(-1)
 
-working_set_dir = cfg_dir + "/test/"
 
-new_working_set(cfg_dir, working_set_dir)
+# il1/dl1 block sizes.
+# inherits from these settings:
+#	- ifqsize = il1 block size = dl1 block size
+# 	- ul2 block size is at least twice dl1/il1 block size
+# constraints:
+#	- max: 64
+#	- will only be considering powers of 2
 
-regex = create_cache_change_regex("il1",1024,8,1,"l")
-modify_working_set(working_set_dir, [regex])
+for block_size in [8,16,32,64]:
+	
+	l1_block_size = block_size
+	l2_block_size = 2*block_size
 
-merge_working_set(cfg_dir, working_set_dir)
+	l1_assoc = 1
+	l2_assoc = 2
+
+	l1_size = 1024*8
+	l2_size = 2048*16*2
+
+	## Create working set.
+	working_set_dir = cfg_dir + "/block_size/"
+	new_working_set(cfg_dir, working_set_dir)
+
+	## Create modifications.
+	regexes = []
+	
+	# Block size.
+	regexes.append(create_cache_change_regex("il1",l1_size/block_size,block_size,1,"r"))
+	regexes.append(create_cache_change_regex("dl1",l1_size/block_size,block_size,1,"r"))
+	regexes.append(create_cache_change_regex("ul2",l2_size/(block_size*2*2),(2*block_size),2,"r"))
+	# ifq size
+	regexes.append(create_setting_change_regex("ifqsize", [block_size/8]))
+
+	# il1/dl1 latencies
+	l1_lat = 1
+	if l1_block_size == 8:
+		l1_lat = 1
+	elif l1_block_size == 16:
+		l1_lat = 2
+	elif l1_block_size == 32:
+		l1_lat = 3
+	elif l1_block_size == 64:
+		l1_lat = 4
+	
+	if l1_assoc == 2:
+		l1_lat += 1
+	elif l1_assoc == 4:
+		l1_lat += 2
+	
+	regexes.append(create_setting_change_regex("il1lat", [l1_lat])
+	regexes.append(create_setting_change_regex("dl1lat", [l1_lat])
+
+	# ul2 latency
+	l2_lat = 5
+	if l2_block_size == 64:
+		l2_lat = 5
+	elif l2_block_size == 128:
+		l2_lat = 6
+	elif l2_block_size == 256:
+		l2_lat = 7
+	elif l2_block_size == 512:
+		l2_lat = 8
+	elif l2_block_size == 1024:
+		l2_lat = 9	
+
+	#STOPPED HERE
+
+	## Modify working set.
+	modify_working_set(working_set_dir, regexes)
+
+	## Merge.
+	merge_working_set(cfg_dir, working_set_dir)
+
+
 
