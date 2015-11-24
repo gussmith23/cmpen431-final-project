@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Script to create a new "working set" - i.e., a copy of all current configs
 # which we can modify with different parameters. The intended use is:
 #
@@ -9,15 +11,21 @@
 #	main cfgs directory.
 #
 # Arguments:
-# $1 - the configs directory.
-# $2 - the temporary working directory to copy to (doesn't have to exist)
+# $1 - the abs. path of the base of the final project.
+# $2 - the configs directory, relative to the base in $1
+# $3 - the temporary working directory to copy to (doesn't have to exist)
+#	again, relative to the base in $1.
 
-cfg_dir=$1
-working_set_dir=$2
+base_dir=$1
+cfg_dir=$2
+working_set_dir=$3
 
-mkdir "$working_set_dir"
+mkdir "$base_dir"/"$working_set_dir"
 
 # Copy each file in with a random name.
-for file in "$cfg_dir"/*; do
-	cp "$file" "$working_set_dir"/$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1).cfg
+for file in "$base_dir"/"$cfg_dir"/*.cfg; do
+	new_filename=$(python "$base_dir"/utils/random_filename.py)	
+ 	cp "$file" "$base_dir"/"$working_set_dir"/"$new_filename".cfg
 done
+
+exit 0
