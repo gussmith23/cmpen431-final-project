@@ -9,6 +9,9 @@
 
 working_set_dir=$1;
 
+echo "${@:2}"
+
 for regexp in "${@:2}"; do
-	sed -i -e "$regexp" "$working_set_dir"/*
+	echo $regexp
+	sed -i -e $regexp "$working_set_dir"/*
 done
