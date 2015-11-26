@@ -11,6 +11,7 @@
 import subprocess
 import sys
 import os
+import itertools  # for itertools.product.
 
 
 #######################
@@ -53,6 +54,21 @@ ss_settings = {
 	'memwidth':	"-mem:width",
 	'redir':	"-redir:sim"
 }
+
+
+## POSSIBLE SETTING VALUES
+# (l stands for list. i'm not good at naming things)
+
+l_l1_blocksize 		= [8, 16, 32, 64]
+l_l2_blocksize 		= [64, 128, 256, 512, 1024]
+
+l_l1_assoc 		= [1, 2, 4]
+l_l2_assoc		= [1, 2, 4, 8, 16]
+
+l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
+
+l_decode_width 		= [1, 2, 4, 8, 16]
+
 
 
 ########################
@@ -153,40 +169,35 @@ if not base_dir or not cfg_dir:
 	sys.exit(-1)
 
 
-# il1/dl1 block sizes.
-# inherits from these settings:
-#	- ifqsize = il1 block size = dl1 block size
-# 	- ul2 block size is at least twice dl1/il1 block size
-# constraints:
-#	- max: 64
-#	- will only be considering powers of 2
+product_counter = 0
+total_products = len(l_l1_blocksize)*len(l_l2_blocksize)*len(l_l1_assoc)*len(l_l2_assoc)\
+			*len(l_bpred)*len(l_decode_width)
 
-for block_size in [8,16,32,64]:
+for product in itertools.product(	l_l1_blocksize,  	#0 
+					l_l2_blocksize, 	#1
+					l_l1_assoc, 		#2
+					l_l2_assoc, 		#3
+					l_bpred, 		#4
+					l_decode_width):	#5
 	
-	l1_block_size = block_size
-	l2_block_size = 2*block_size
+	## Get values from product.
 
-	l1_assoc = 1
-	l2_assoc = 2
+	l1_block_size = product[0]
+	l2_block_size = product[1]
+
+	l1_assoc = product[2]
+	l2_assoc = product[3]
 
 	l1_size = 1024*8
 	l2_size = 2048*16*2
 
-	## Create working set.
-	working_set_dir = cfg_dir + "/block_size/"
-	new_working_set(cfg_dir, working_set_dir)
-
-	## Create modifications.
-	regexes = []
 	
-	# Block size.
-	regexes.append(create_cache_change_regex("il1",l1_size/block_size,block_size,1,"r"))
-	regexes.append(create_cache_change_regex("dl1",l1_size/block_size,block_size,1,"r"))
-	regexes.append(create_cache_change_regex("ul2",l2_size/(block_size*2*2),(2*block_size),2,"r"))
+	## Set values based on values from product.
+	
 	# ifq size
-	regexes.append(create_setting_change_regex("ifqsize", [block_size/8]))
+	ifq_size = l1_block_size/8
 
-	# il1/dl1 latencies
+	# l1 latency	
 	l1_lat = 1
 	if l1_block_size == 8:
 		l1_lat = 1
@@ -201,11 +212,8 @@ for block_size in [8,16,32,64]:
 		l1_lat += 1
 	elif l1_assoc == 4:
 		l1_lat += 2
-	
-	regexes.append(create_setting_change_regex("il1lat", [l1_lat]))
-	regexes.append(create_setting_change_regex("dl1lat", [l1_lat]))
 
-	# ul2 latency
+	# l2 latency
 	l2_lat = 5
 	if l2_block_size == 64:
 		l2_lat = 5
@@ -227,14 +235,54 @@ for block_size in [8,16,32,64]:
 	elif l2_assoc == 16:
 		l2_lat += 3
 
+
+	## Check values.
+
+	if l1_block_size*2 > l2_block_size:
+		continue
+	
+
+	## Create working set.
+	working_set_dir = cfg_dir + "/tmp/"
+	new_working_set(cfg_dir, working_set_dir)
+
+	## Create modifications.
+	regexes = []
+	
+	# l1, l2.
+	regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
+	regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
+	regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,"r"))
+	
+	# ifq size
+	regexes.append(create_setting_change_regex("ifqsize", [ifq_size]))
+
+	# l1 latencies	
+	regexes.append(create_setting_change_regex("il1lat", [l1_lat]))
+	regexes.append(create_setting_change_regex("dl1lat", [l1_lat]))
+
+	# ul2 latency
 	regexes.append(create_setting_change_regex("il2lat", [l2_lat]))
 	regexes.append(create_setting_change_regex("dl2lat", [l2_lat]))
+
+	
+	## Create a name for the output!
+	out_name = str(l1_block_size) + "_" \
+		+ str(l2_block_size) + "_" \
+		+ str(l1_assoc) + "_" \
+		+ str(l2_assoc) + ".out"
+
+	regexes.append(create_setting_change_regex("redir", [out_name]))
+
 
 	## Modify working set.
 	modify_working_set(working_set_dir, regexes)
 
+
 	## Merge.
 	merge_working_set(cfg_dir, working_set_dir)
 
-
+	## Update product counter.
+	product_counter += 1
+	print("Progress: [" + str(product_counter) + "/" + str(total_products) + "]")
 
