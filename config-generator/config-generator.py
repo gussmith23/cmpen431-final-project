@@ -202,8 +202,8 @@ for block_size in [8,16,32,64]:
 	elif l1_assoc == 4:
 		l1_lat += 2
 	
-	regexes.append(create_setting_change_regex("il1lat", [l1_lat])
-	regexes.append(create_setting_change_regex("dl1lat", [l1_lat])
+	regexes.append(create_setting_change_regex("il1lat", [l1_lat]))
+	regexes.append(create_setting_change_regex("dl1lat", [l1_lat]))
 
 	# ul2 latency
 	l2_lat = 5
@@ -218,7 +218,17 @@ for block_size in [8,16,32,64]:
 	elif l2_block_size == 1024:
 		l2_lat = 9	
 
-	#STOPPED HERE
+	if l2_assoc == 1:
+		l2_lat += -1
+	elif l2_assoc == 4:
+		l2_lat += 1
+	elif l2_assoc == 8:
+		l2_lat += 2
+	elif l2_assoc == 16:
+		l2_lat += 3
+
+	regexes.append(create_setting_change_regex("il2lat", [l2_lat]))
+	regexes.append(create_setting_change_regex("dl2lat", [l2_lat]))
 
 	## Modify working set.
 	modify_working_set(working_set_dir, regexes)
