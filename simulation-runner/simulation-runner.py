@@ -33,12 +33,15 @@ os.mkdir(base_dir + "/" + dest_dir)
 # get the files in the immediate directory.
 onlyfiles = [f for f in os.listdir(base_dir + "/" + cfg_dir) if isfile(join(base_dir + "/" + cfg_dir, f))]
 
-
 # Extra fields to return.
 fields = []
 
-# For each config, we'll generate 6 outputs.
+#
+out_string = ""
+
 for config_to_run in onlyfiles:
+
+	out_string += config_to_run + "\n"
 
 	# collect float and int execution times so we can calculate geometric means.
 	int_exec_time = []
@@ -46,9 +49,15 @@ for config_to_run in onlyfiles:
 
 	# The name of the folder where we'll store an output for each benchmarks
 	output_folder_name = os.path.splitext( os.path.basename(config_to_run) )[0]
-	
+
+	# We only want to print the header once.
+	print_column_names = 1
+
 	for benchmark_name in benchmark_commands:
 		
+		# Print benchmark name.
+		out_string += "\n" + benchmark_name + "\n"
+
 		# The command which will run the sim.
 		command = BASE + benchmark_commands[benchmark_name]
 		command = command.replace("{config_file}", base_dir + "/" + cfg_dir + "/" + str(config_to_run))
@@ -76,10 +85,23 @@ for config_to_run in onlyfiles:
 			int_exec_time.append(parsed_output['execution_time'])
 		else:	
 			float_exec_time.append(parsed_output['execution_time'])
-	
-	
+			
+		# Print out columns.
+
+		# First, print column name if needed.
+		if print_column_names == 1:
+			for column_name in parsed_output:
+				out_string += column_name + ","
+			out_string += "\n"
+
+		# Then, print column values.
+		for column_name in parsed_output:
+			out_string += str( parsed_output[column_name] ) + ","
+		out_string += "\n"
+
 	int_exec_time_mean = (reduce(lambda x, y: x*y, int_exec_time))**(1.0/len(int_exec_time)) 
 	float_exec_time_mean = (reduce(lambda x, y: x*y, float_exec_time))**(1.0/len(float_exec_time)) 
 
-	print int_exec_time_mean
-	print float_exec_time_mean
+	out_string += "\n" + str(int_exec_time_mean) + "\n" + str(float_exec_time_mean) + "\n"
+
+print out_string
