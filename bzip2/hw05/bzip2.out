@@ -1,0 +1,33 @@
+bzip2
+hw05_sim1_is2_bpred_nottaken.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.2313 # instructions per cycle
+
+hw05_sim2_is2_bpred_bimod.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.2367 # instructions per cycle
+
+hw05_sim3_is2_bpred_bimod_noras.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.2367 # instructions per cycle
+
+hw05_sim4_is2_bpred_perfect.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.2367 # instructions per cycle
+
+hw05_sim5_os4_bpred_nottaken.out
+sim_total_insn              4423822 # total number of instructions executed
+sim_IPC                      0.3981 # instructions per cycle
+
+hw05_sim6_os4_bpred_bimod.out
+sim_total_insn              2502288 # total number of instructions executed
+sim_IPC                      0.4160 # instructions per cycle
+
+hw05_sim7_os4_bpred_bimod_noras.out
+sim_total_insn              2502540 # total number of instructions executed
+sim_IPC                      0.4160 # instructions per cycle
+
+hw05_sim8_os4_bpred_perfect.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.4150 # instructions per cycle
+

@@ -1,0 +1,24 @@
+hw04_sim1_staticSS.out
+sim_total_insn              2500000 # total number of instructions executed
+sim_IPC                      0.3411 # instructions per cycle
+ifq_occupancy                1.0367 # avg IFQ occupancy (insn's)
+ruu_occupancy                1.3140 # avg RUU occupancy (insn's)
+lsq_occupancy                0.5313 # avg LSQ occupancy (insn's)
+
+
+hw04_sim2_dynamicSS_2.out
+sim_total_insn              3351616 # total number of instructions executed
+sim_IPC                      0.4092 # instructions per cycle
+ifq_occupancy                0.8156 # avg IFQ occupancy (insn's)
+ruu_occupancy                2.5577 # avg RUU occupancy (insn's)
+lsq_occupancy                0.9103 # avg LSQ occupancy (insn's)
+
+
+hw04_sim3_dynamicSS_2.out
+sim_total_insn              4178292 # total number of instructions executed
+sim_IPC                      0.4764 # instructions per cycle
+ifq_occupancy                1.1869 # avg IFQ occupancy (insn's)
+ruu_occupancy                3.7641 # avg RUU occupancy (insn's)
+lsq_occupancy                1.3477 # avg LSQ occupancy (insn's)
+
+

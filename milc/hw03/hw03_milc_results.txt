@@ -1,0 +1,65 @@
+hw03_sim1_base.out
+sim_IPC                      0.3929 # instructions per cycle
+il1.hits                    2730896 # total number of hits
+il1.misses                     8875 # total number of misses
+il1.miss_rate                0.0032 # miss rate (i.e., misses/ref)
+dl1.hits                    1262988 # total number of hits
+dl1.misses                   172225 # total number of misses
+dl1.miss_rate                0.1200 # miss rate (i.e., misses/ref)
+ul2.hits                     263607 # total number of hits
+ul2.misses                    87720 # total number of misses
+ul2.miss_rate                0.2497 # miss rate (i.e., misses/ref)
+
+
+hw03_sim2_largerl2.out
+sim_IPC                      0.3833 # instructions per cycle
+il1.hits                    2730897 # total number of hits
+il1.misses                     8875 # total number of misses
+il1.miss_rate                0.0032 # miss rate (i.e., misses/ref)
+dl1.hits                    1262988 # total number of hits
+dl1.misses                   172225 # total number of misses
+dl1.miss_rate                0.1200 # miss rate (i.e., misses/ref)
+ul2.hits                     264368 # total number of hits
+ul2.misses                    86959 # total number of misses
+ul2.miss_rate                0.2475 # miss rate (i.e., misses/ref)
+
+
+hw03_sim3_largerl2l1.out
+sim_IPC                      0.3808 # instructions per cycle
+il1.hits                    2730900 # total number of hits
+il1.misses                     8827 # total number of misses
+il1.miss_rate                0.0032 # miss rate (i.e., misses/ref)
+dl1.hits                    1263263 # total number of hits
+dl1.misses                   171950 # total number of misses
+dl1.miss_rate                0.1198 # miss rate (i.e., misses/ref)
+ul2.hits                     263947 # total number of hits
+ul2.misses                    86946 # total number of misses
+ul2.miss_rate                0.2478 # miss rate (i.e., misses/ref)
+
+
+hw03_sim4_setassoc_LRU.out
+sim_IPC                      0.3781 # instructions per cycle
+il1.hits                    2730899 # total number of hits
+il1.misses                     8827 # total number of misses
+il1.miss_rate                0.0032 # miss rate (i.e., misses/ref)
+dl1.hits                    1263544 # total number of hits
+dl1.misses                   171669 # total number of misses
+dl1.miss_rate                0.1196 # miss rate (i.e., misses/ref)
+ul2.hits                     262774 # total number of hits
+ul2.misses                    86946 # total number of misses
+ul2.miss_rate                0.2486 # miss rate (i.e., misses/ref)
+
+
+hw03_sim5_setassoc_rand.out
+sim_IPC                      0.3780 # instructions per cycle
+il1.hits                    2730899 # total number of hits
+il1.misses                     8827 # total number of misses
+il1.miss_rate                0.0032 # miss rate (i.e., misses/ref)
+dl1.hits                    1263492 # total number of hits
+dl1.misses                   171721 # total number of misses
+dl1.miss_rate                0.1196 # miss rate (i.e., misses/ref)
+ul2.hits                     262611 # total number of hits
+ul2.misses                    86949 # total number of misses
+ul2.miss_rate                0.2487 # miss rate (i.e., misses/ref)
+
+

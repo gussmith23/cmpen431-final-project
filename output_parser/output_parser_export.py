@@ -6,9 +6,9 @@ import os
 # example lines: lines = [line.rstrip() for line in open("file.txt")]
 # example fields: fields = [line.rstrip() for line in open(base_dir + "/" + fields_to_parse_file)] 
 def parse_output(lines, fields):
-	
-	# The return is a .csv in string format.
-	return_string = "machine,"  + ",".join(str(field) for field in fields) + ",clock cycle,execution time\n"
+
+	# Return
+	return_dict = {}
 
 	# Create needed regex parsers.
 	value_parser = re.compile("[0-9.]+|true|false")
@@ -19,6 +19,16 @@ def parse_output(lines, fields):
 	if "sim_total_insn" not in fields: fields.append("sim_total_insn")
 	if "sim_IPC" not in fields: fields.append("sim_IPC")
 	
+	# The return is a .csv in string format.
+	# Generate column header
+	return_string = "machine" 
+	for field in fields: return_string += "," + field
+	return_string += ",clock cycle,execution time\n"
+
+	# include machine name in return val
+	return_string += ", PLACEHOLDER"
+	return_dict['name'] = "PLACEHOLDER"
+
 	# Important variables to log as we parse through the output.
 	width = 0
 	inorder = 0
@@ -29,8 +39,11 @@ def parse_output(lines, fields):
 	for field in fields:
 		result = filter(lambda line: field in line, lines)[0]
 		val = value_parser.search(result).group().strip()
-		return_string += "," + str(val)
 		
+		# put the value in our return val.
+		return_string += "," + str(val)
+		return_dict[field] = val
+
 		# Keep track of the vals needed to calculate clock cycle.
 		if field == "issue:width": width = int(val)
 		if field == "issue:inorder":
@@ -53,9 +66,11 @@ def parse_output(lines, fields):
 	
 	# second to last column: clock cycle. 
 	return_string += "," + str(clock_cycle)
+	return_dict['clock_cycle'] = clock_cycle
 
 	# last column: execution time
 	execution_time = (total_insn * clock_cycle)/ipc
 	return_string += "," + str(execution_time)
+	return_dict['execution_time'] = execution_time
 
-	return return_string
+	return return_dict
