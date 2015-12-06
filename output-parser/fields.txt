@@ -1,0 +1,2 @@
+sim_total_insn
+sim_IPC
