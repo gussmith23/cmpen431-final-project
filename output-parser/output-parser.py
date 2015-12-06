@@ -10,16 +10,12 @@ if not base_dir or not output_to_parse_dir or not fields_to_parse_file:
 	sys.exit(-1)
 
 # Create needed regex parsers.
-value_parser = re.compile("[0-9.]+")
-pattern_dict = {}
-with open(base_dir + "/" + fields_to_parse_file) as file1:
-    for line in file1:
-    	
-    	field = line.rstrip()
-	pattern_dict[field] = re.compile(re.escape(field))
-    	#patterns = "|".join(re.escape(line.rstrip()) for line in file1)
+value_parser = re.compile("[0-9.]+i|true|false")
+#bool_parser  = re.compile("[true|false]+")
 
-fields = [line.rstrip() for line in open(base_dir + "/" + fields_to_parse_file)]
+fields = [line.rstrip() for line in open(base_dir + "/" + fields_to_parse_file)] 
+field.append("issue.width")
+field.append("issue.inorder")
 
 print "machine,"  + ",".join(str(field) for field in fields)
 
