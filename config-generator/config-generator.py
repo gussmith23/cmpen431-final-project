@@ -96,8 +96,8 @@ l_decode_width 		= [1, 2, 4, 8, 16]
 # _cfg_dir: configs directory relative to base of project.
 # _working_set_dir: location to make new working set, relative to base of project.
 
-def new_working_set(_cfg_dir, _working_set_dir):
-	command = "sh" + " " + base_dir + "/config-generator/new-working-set.sh" + " "  + base_dir + " " + _cfg_dir + " " + _working_set_dir
+def new_working_set(_base_dir, _cfg_dir, _working_set_dir):
+	command = "sh" + " " + _base_dir + "/config-generator/new-working-set.sh" + " "  + _base_dir + " " + _cfg_dir + " " + _working_set_dir
 	subprocess.call(command.split())
 
 
@@ -112,8 +112,8 @@ def new_working_set(_cfg_dir, _working_set_dir):
 #		"newstring". Note the double backslash - it is technically
 #		just a single backslash, but it needs to be escaped in python.
 
-def modify_working_set(_working_set_dir, regexps):
-	command = "sh" + " " + base_dir + "/config-generator/modify-working-set.sh" + " "  + base_dir + "/" + _working_set_dir
+def modify_working_set(_base_dir, _working_set_dir, regexps):
+	command = "sh" + " " + _base_dir + "/config-generator/modify-working-set.sh" + " "  + _base_dir + "/" + _working_set_dir
 	for regexp in regexps:
 		command += " " + "\"" + regexp + "\""
 	os.system(command)
@@ -127,8 +127,8 @@ def modify_working_set(_working_set_dir, regexps):
 # _cfg_dir - the directory to merge into, relative to base of project.
 # _working_set_dir - the working set, relative to base of project.
 
-def merge_working_set(_cfg_dir, _working_set_dir):
-	command = "sh" + " " + base_dir + "/config-generator/merge-working-set.sh" + " " + base_dir + "/" + _cfg_dir + " "  + base_dir + "/" + _working_set_dir
+def merge_working_set(_base_dir, _cfg_dir, _working_set_dir):
+	command = "sh" + " " + _base_dir + "/config-generator/merge-working-set.sh" + " " + _base_dir + "/" + _cfg_dir + " "  + _base_dir + "/" + _working_set_dir
 	os.system(command)
 
 
@@ -162,127 +162,134 @@ def create_setting_change_regex(name, vals):
 #######################
 ## MAIN ROUTINE
 
-base_dir = str(sys.argv[1])
-cfg_dir = str(sys.argv[2])
+def config_generator(base_dir, cfg_dir,
+				_l_l1_blocksize = l_l1_blocksize,
+				_l_l2_blocksize = l_l2_blocksize,
+				_l_l1_assoc	= l_l1_assoc,   
+				_l_l2_assoc	= l_l2_assoc,    
+				_l_bpred	= l_bpred,	      
+				_l_decode_width	= l_decode_width):
 
-if not base_dir or not cfg_dir:
-	sys.exit(-1)
+
+	# Check for valid input.
+	if not base_dir or not cfg_dir:
+		sys.exit(-1)
 
 
-product_counter = 0
-total_products = len(l_l1_blocksize)*len(l_l2_blocksize)*len(l_l1_assoc)*len(l_l2_assoc)\
-			*len(l_bpred)*len(l_decode_width)
+	product_counter = 0
+	total_products = len(_l_l1_blocksize)*len(_l_l2_blocksize)*len(_l_l1_assoc)*len(_l_l2_assoc)\
+				*len(_l_bpred)*len(_l_decode_width)
 
-for product in itertools.product(	l_l1_blocksize,  	#0 
-					l_l2_blocksize, 	#1
-					l_l1_assoc, 		#2
-					l_l2_assoc, 		#3
-					l_bpred, 		#4
-					l_decode_width):	#5
-	
-	## Get values from product.
+	for product in itertools.product(	_l_l1_blocksize,  	#0 
+						_l_l2_blocksize, 	#1
+						_l_l1_assoc, 		#2
+						_l_l2_assoc, 		#3
+						_l_bpred, 		#4
+						_l_decode_width):	#5
+		
+		## Get values from product.
 
-	l1_block_size = product[0]
-	l2_block_size = product[1]
+		l1_block_size = product[0]
+		l2_block_size = product[1]
 
-	l1_assoc = product[2]
-	l2_assoc = product[3]
+		l1_assoc = product[2]
+		l2_assoc = product[3]
 
-	l1_size = 1024*8
-	l2_size = 2048*16*2
+		l1_size = 1024*8
+		l2_size = 2048*16*2
 
-	
-	## Set values based on values from product.
-	
-	# ifq size
-	ifq_size = l1_block_size/8
+		
+		## Set values based on values from product.
+		
+		# ifq size
+		ifq_size = l1_block_size/8
 
-	# l1 latency	
-	l1_lat = 1
-	if l1_block_size == 8:
+		# l1 latency	
 		l1_lat = 1
-	elif l1_block_size == 16:
-		l1_lat = 2
-	elif l1_block_size == 32:
-		l1_lat = 3
-	elif l1_block_size == 64:
-		l1_lat = 4
-	
-	if l1_assoc == 2:
-		l1_lat += 1
-	elif l1_assoc == 4:
-		l1_lat += 2
+		if l1_block_size == 8:
+			l1_lat = 1
+		elif l1_block_size == 16:
+			l1_lat = 2
+		elif l1_block_size == 32:
+			l1_lat = 3
+		elif l1_block_size == 64:
+			l1_lat = 4
+		
+		if l1_assoc == 2:
+			l1_lat += 1
+		elif l1_assoc == 4:
+			l1_lat += 2
 
-	# l2 latency
-	l2_lat = 5
-	if l2_block_size == 64:
+		# l2 latency
 		l2_lat = 5
-	elif l2_block_size == 128:
-		l2_lat = 6
-	elif l2_block_size == 256:
-		l2_lat = 7
-	elif l2_block_size == 512:
-		l2_lat = 8
-	elif l2_block_size == 1024:
-		l2_lat = 9	
+		if l2_block_size == 64:
+			l2_lat = 5
+		elif l2_block_size == 128:
+			l2_lat = 6
+		elif l2_block_size == 256:
+			l2_lat = 7
+		elif l2_block_size == 512:
+			l2_lat = 8
+		elif l2_block_size == 1024:
+			l2_lat = 9	
 
-	if l2_assoc == 1:
-		l2_lat += -1
-	elif l2_assoc == 4:
-		l2_lat += 1
-	elif l2_assoc == 8:
-		l2_lat += 2
-	elif l2_assoc == 16:
-		l2_lat += 3
-
-
-	## Check values.
-
-	if l1_block_size*2 > l2_block_size:
-		continue
-	
-
-	## Create working set.
-	working_set_dir = cfg_dir + "/tmp/"
-	new_working_set(cfg_dir, working_set_dir)
-
-	## Create modifications.
-	regexes = []
-	
-	# l1, l2.
-	regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
-	regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
-	regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,"r"))
-	
-	# ifq size
-	regexes.append(create_setting_change_regex("ifqsize", [ifq_size]))
-
-	# l1 latencies	
-	regexes.append(create_setting_change_regex("il1lat", [l1_lat]))
-	regexes.append(create_setting_change_regex("dl1lat", [l1_lat]))
-
-	# ul2 latency
-	regexes.append(create_setting_change_regex("il2lat", [l2_lat]))
-	regexes.append(create_setting_change_regex("dl2lat", [l2_lat]))
-
-	
-	## Create a name for the output!
-	out_name = str(l1_block_size) + "_" \
-		+ str(l2_block_size) + "_" \
-		+ str(l1_assoc) + "_" \
-		+ str(l2_assoc) + ".out"
-
-	regexes.append(create_setting_change_regex("redir", [out_name]))
+		if l2_assoc == 1:
+			l2_lat += -1
+		elif l2_assoc == 4:
+			l2_lat += 1
+		elif l2_assoc == 8:
+			l2_lat += 2
+		elif l2_assoc == 16:
+			l2_lat += 3
 
 
-	## Modify working set.
-	modify_working_set(working_set_dir, regexes)
+		## Check values.
+
+		if l1_block_size*2 > l2_block_size:
+			continue
+		
+
+		## Create working set.
+		working_set_dir = cfg_dir + "/tmp/"
+		new_working_set(base_dir, cfg_dir, working_set_dir)
+
+		## Create modifications.
+		regexes = []
+		
+		# l1, l2.
+		regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
+		regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
+		regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,"r"))
+		
+		# ifq size
+		regexes.append(create_setting_change_regex("ifqsize", [ifq_size]))
+
+		# l1 latencies	
+		regexes.append(create_setting_change_regex("il1lat", [l1_lat]))
+		regexes.append(create_setting_change_regex("dl1lat", [l1_lat]))
+
+		# ul2 latency
+		regexes.append(create_setting_change_regex("il2lat", [l2_lat]))
+		regexes.append(create_setting_change_regex("dl2lat", [l2_lat]))
+
+		
+		## Create a name for the output!
+		out_name = str(l1_block_size) + "_" \
+			+ str(l2_block_size) + "_" \
+			+ str(l1_assoc) + "_" \
+			+ str(l2_assoc) + ".out"
+
+		regexes.append(create_setting_change_regex("redir", [out_name]))
 
 
-	## Merge.
-	merge_working_set(cfg_dir, working_set_dir)
+		## Modify working set.
+		modify_working_set(base_dir, working_set_dir, regexes)
 
-	## Update product counter.
-	product_counter += 1
-	print("Progress: [" + str(product_counter) + "/" + str(total_products) + "]")
+
+		## Merge.
+		merge_working_set(base_dir, cfg_dir, working_set_dir)
+
+		## Update product counter.
+		product_counter += 1
+		print("Progress: [" + str(product_counter) + "/" + str(total_products) + "]")
 
