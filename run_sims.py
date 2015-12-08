@@ -1,6 +1,8 @@
 import os
 execfile("config-generator/config-generator.py")
 execfile("simulation-runner/simulation-runner.py")
+# this is messy: import parse_output.
+execfile(os.getcwd() + "/output_parser/output_parser_export.py")
 
 ## First: generate configs.
 
