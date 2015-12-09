@@ -311,30 +311,38 @@ def config_generator(base_dir, cfg_dir,
 		## Check values.
 
 		if l1_block_size*2 > l2_block_size:
+			print "Invalid cfg: l1_block_size*2 > l2_block_size. Continuing..."
 			continue
 		
 		# decode:width less than or equal to fetch:ifqsize
 		if decode_width > ifq_size:
+			print "Invalid cfg: decode_width > ifq_size. Continuing..."
 			continue
 
 		# imult+ialu <= 2*issue_width (same for fpmult/alu)
 		if imult + ialu > 2*issue_width:
+			print "Invalid cfg: too many ialu/mults. Continuing..."
 			continue
 		if fpmult + fpalu > 2*issue_width:
+			print "Invalid cfg: too many fpalu/mults. Continuing..."
 			continue
 		
 		# ruusize no more than 8 times issue_width
 		if ruusize > 8*issue_width:
+			print "Invalid cfg: ruusize > 8*issue_width. Continuing..."
 			continue
 
 		# lsqsize no more than 4 times issue_width
 		if lsqsize > 4*issue_width:
+			print "Invalid cfg: lsqsize > 4*issue_width. Continuing..."
 			continue
 
 		# issue widths are 1,2,4 for static, 2,4,8 for dynamic
-		if inorder == "true" and issue_width == 8:
+		if inorder == "true" and issue_width not in [1,2,4]:
+			print "Invalid cfg: invalid issue width for static datapath. Continuing..."
 			continue
-		if inorder == "false" and issue_width == 1:
+		if inorder == "false" and issue_width not in [2,4,8]:
+			print "Invalid cfg: invalid issue width for dynamic datapath. Continuing..."
 			continue
 
 		## Create working set.

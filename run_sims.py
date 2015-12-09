@@ -30,15 +30,15 @@ l_l2_assoc = [1]
 l_bpred = ['2lev']
 
 #l_decode_width 		= [1, 2, 4, 8, 16]
-l_decode_width = [1]
+l_decode_width = [1,2,4,8,16]
 
 # Note: issue width for static is 1,2,4; for dynamic is 2,4,8.
 #l_issue_width		= [1, 2, 4, 8]
-l_issue_width = [1]
+l_issue_width = [4]
 
 # Fetch speed ratios - this should probably always be 4
 #l_fetch_speed		= [1,2,3,4]
-l_fetch_speed = [1]
+l_fetch_speed = [4]
 
 #l_imult 		= range(1, 2*8+1)
 #l_ialu			= l_imult
@@ -51,16 +51,16 @@ l_fpalu = [1]
 
 
 #l_ras			= [8, 16]
-l_ras = [8]
+l_ras = [16]
 
 #l_btb_sets 		= [512, 1024]
-l_btb_sets = [512]
+l_btb_sets = [1024]
 
 #l_ruusize 		= [2, 4, 8, 16, 32, 64]
-l_ruusize = [2]
+l_ruusize = [16]
 
 #l_lsqsize		= [2, 4, 8, 16, 32]
-l_lsqsize = [2]
+l_lsqsize = [16]
 
 #l_issue_inorder 	= ['true', 'false']
 l_issue_inorder = ['true','false']

@@ -11,6 +11,8 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 		sys.exit(-1)
 
 	# this is messy: import parse_output.
+	# NOTE: THIS DOESN'T WORK HERE! YOU NEED TO Import parse_output 
+	# before calling simulation_runner. sorry for how messy that is.
 	#execfile(base_dir + "/output_parser/output_parser_export.py")
 
 	# a combination of base and an entry from benchmark_commands creates a command-line 
@@ -52,39 +54,37 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 			"cache:il2lat",
 			]
 
-	# the .csv containing info from all cfgs.
-	all_cfgs_out_string = ""
-
-	# 
-	all_parsed_outputs = []
+	# The list of results from each machine.
 	sim_list = []
+
+	# There's some setup we need to do on the first iteration (e.g. setup output .csv.)
+	#	This indicates whether or not that needs to be done.
+	first_iteration_setup = 1
+
+	# This is the file where the parsed output for each machine will go.
+	output_csv = open(base_dir + "/" + dest_dir + "/all_machines.csv", 'w')
+
+	# this is the DictWriter writing into the output_csv file.
+	dict_writer = 0 # initialized after first iteration.
+
 
 	for config_to_run in onlyfiles:
 		
 		# Print
 		print 'Running config {0}:'.format(config_to_run)
 		
-		# the .csv containing info for this config.
-		out_string = ""
-		out_string += config_to_run + "\n"
-
 		# collect float and int execution times so we can calculate geometric means.
 		int_exec_time = []
 		float_exec_time = []
-	
-		# The name of the folder where we'll store an output for each benchmarks
-		output_folder_name = os.path.splitext( os.path.basename(config_to_run) )[0]
-	
-		# We only want to print the header once.
-		print_column_names = 1
-
+		
+		# our entry into sim_list. thus, sim_list is a list of these objects below.
+		# each sim_list_entry corresponds to a row in our output .csv.
 		sim_list_entry = {}
+
 		sim_list_entry['config'] = config_to_run
 
+		# run all six benchmarks.
 		for benchmark_name in benchmark_commands:
-			
-			# Print benchmark name.
-			out_string += "\n" + benchmark_name + "\n"
 
 			# The command which will run the sim.
 			command = BASE + benchmark_commands[benchmark_name]
@@ -104,15 +104,11 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 			cmd_out, cmd_err = p.communicate()
 			lines = cmd_err.split('\n')
 			
-			
 			# Parse output into a dict.
 			parsed_output = parse_output(lines, fields+settings)
 			
 			# append sim name.
 			parsed_output['benchmark'] = benchmark_name 
-
-			# store parsed output.
-			all_parsed_outputs.append(parsed_output)
 
 			# Get exec time.
 			if benchmark_name in ["bzip", "hmmer", "sjeng", "mcf"]: 
@@ -120,19 +116,6 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 			else:	
 				float_exec_time.append(parsed_output['execution_time'])
 				
-			# Print out columns.
-
-			# First, print column name if needed.
-			if print_column_names == 1:
-				for column_name in parsed_output:
-					out_string += column_name + ","
-				out_string += "\n"
-
-			# Then, print column values.
-			for column_name in parsed_output:
-				out_string += str( parsed_output[column_name] ) + ","
-			out_string += "\n"
-
 			print '\t{0} execution time: {1}'.format(benchmark_name, parsed_output['execution_time'])
 
 			# We shouldn't do this every iteration of this loop; we only need to do it once.
@@ -144,9 +127,11 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 				sim_list_entry[benchmark_name + "_execution_time"] = parsed_output['execution_time']
 				sim_list_entry[benchmark_name + "_ipc"] = parsed_output['sim_IPC']
 
+		# End for each benchmark.
+
+		# Calculate and store geometric means.
 		int_exec_time_mean = (reduce(lambda x, y: x*y, int_exec_time))**(1.0/len(int_exec_time)) 
 		float_exec_time_mean = (reduce(lambda x, y: x*y, float_exec_time))**(1.0/len(float_exec_time)) 
-	
 		sim_list_entry['int_exec_time'] = int_exec_time_mean
 		sim_list_entry['float_exec_time'] = float_exec_time_mean
 
@@ -155,34 +140,26 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 		print 'mean float exec time:\t{0}'.format(float_exec_time_mean)
 		print
 
-		out_string += "\n" + str(int_exec_time_mean) + "\n" + str(float_exec_time_mean) + "\n"
+		# If this is the first cfg, open up .csv for writing and append header.
+		if first_iteration_setup == 1:
+			
+			# Open dict writer
+			keys = sim_list_entry.keys()
+			dict_writer = csv.DictWriter(output_csv, keys)
 
-		# Append this cfg run output to the total .csv.
-		all_cfgs_out_string += str(out_string) + "\n"
+			# Create .csv header.
+			header = {}
+			for key in keys:
+				header[key] = str(key)
+			sim_list.insert(0, header)
+			
+			# Write header.
+			dict_writer.writerow(header)
 
-		# Write this cfg's output to file.
-		f = open(base_dir + "/" + dest_dir + "/" + config_to_run[:32] + ".csv", "w")
-		f.write(out_string)
+			first_iteration_setup = 0
 		
 		# append to the sim list.
 		sim_list.append(sim_list_entry)
 
-
-	# write to file.
-	f = open(base_dir + "/" + dest_dir + "/" + "out.csv", 'a')
-	f.write(all_cfgs_out_string)
-
-	# Sort output.
-	all_parsed_outputs = sorted(all_parsed_outputs, key=lambda k: k['execution_time'])
-
-	with open(base_dir + "/" + dest_dir + "/" + 'all.csv', 'wb') as output_file:
-		keys = sim_list[0].keys()
-
-		header = {}
-		for key in keys:
-			header[key] = str(key)
-		sim_list.insert(0, header)
-
-		dict_writer = csv.DictWriter(output_file, keys)
-		dict_writer.writerows(sim_list)
-
+		# writerow to .csv.
+		dict_writer.writerow(sim_list_entry)
