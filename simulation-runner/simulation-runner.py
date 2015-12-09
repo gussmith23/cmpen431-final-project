@@ -139,6 +139,11 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 			for setting in settings:
 				sim_list_entry[setting] = parsed_output[setting]
 
+			# For each machine, we need to keep track of milc/mcf data (so graders can check validity)
+			if benchmark_name is "milc" or benchmark_name is "mcf":
+				sim_list_entry[benchmark_name + "_execution_time"] = parsed_output['execution_time']
+				sim_list_entry[benchmark_name + "_ipc"] = parsed_output['sim_IPC']
+
 		int_exec_time_mean = (reduce(lambda x, y: x*y, int_exec_time))**(1.0/len(int_exec_time)) 
 		float_exec_time_mean = (reduce(lambda x, y: x*y, float_exec_time))**(1.0/len(float_exec_time)) 
 	
