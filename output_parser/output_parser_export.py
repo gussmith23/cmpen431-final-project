@@ -7,6 +7,10 @@ import os
 # example fields: fields = [line.rstrip() for line in open(base_dir + "/" + fields_to_parse_file)] 
 def parse_output(lines, fields):
 
+	if len(lines) < 1:
+		print "parse_output error: no lines passed!"
+		return None
+
 	# Return
 	return_dict = {}
 
@@ -37,6 +41,7 @@ def parse_output(lines, fields):
 	clock_cycle = 0
 
 	for field in fields:
+		
 		result = filter(lambda line: field in line, lines)[0]
 		val = value_parser.search(result).group().strip()
 		

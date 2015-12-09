@@ -26,14 +26,31 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 	}
 
 	# make output dir...
-	os.mkdir(base_dir + "/" + dest_dir)
+	if not os.path.isdir(base_dir + "/" + dest_dir):
+		os.mkdir(base_dir + "/" + dest_dir)
 
 	# get the files in the immediate directory.
 	onlyfiles = [f for f in os.listdir(base_dir + "/" + cfg_dir) if isfile(join(base_dir + "/" + cfg_dir, f))]
 
 	# Extra fields/settings to return.
 	fields = []
-	settings = ["issue:inorder", "issue:width"]
+	settings = [	"issue:inorder", 
+			"issue:width",
+			"bpred ", #keep space where it is
+			"bpred:ras",
+			"bpred:btb",
+			"decode:width",
+			"ruu:size",    
+                        "lsq:size", 
+                        "cache:dl1",  
+                        "cache:dl1lat",
+                        "cache:dl2",
+                        "cache:dl2lat",
+			"cache:il1",
+                        "cache:il1lat",
+                        "cache:il2",
+			"cache:il2lat",
+			]
 
 	# the .csv containing info from all cfgs.
 	all_cfgs_out_string = ""
@@ -152,8 +169,6 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 
 	# Sort output.
 	all_parsed_outputs = sorted(all_parsed_outputs, key=lambda k: k['execution_time'])
-	print all_parsed_outputs
-
 
 	with open(base_dir + "/" + dest_dir + "/" + 'all.csv', 'wb') as output_file:
 		keys = sim_list[0].keys()

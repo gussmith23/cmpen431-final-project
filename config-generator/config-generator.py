@@ -69,6 +69,26 @@ l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
 
 l_decode_width 		= [1, 2, 4, 8, 16]
 
+# Note: issue width for static is 1,2,4; for dynamic is 2,4,8.
+l_issue_width		= [1, 2, 4, 8]
+
+# Fetch speed ratios - this should probably always be 4
+l_fetch_speed		= [1,2,3,4]
+
+l_imult 		= range(1, 2*8+1)
+l_ialu			= l_imult
+l_fpmult 		= l_imult
+l_fpalu			= l_imult
+
+l_ras			= [8, 16]
+
+l_btb_sets 		= [512, 1024]
+
+l_ruusize 		= [2, 4, 8, 16, 32, 64]
+
+l_lsqsize		= [2, 4, 8, 16, 32]
+
+l_issue_inorder 	= ['true', 'false']
 
 
 ########################
@@ -168,7 +188,18 @@ def config_generator(base_dir, cfg_dir,
 				_l_l1_assoc	= l_l1_assoc,   
 				_l_l2_assoc	= l_l2_assoc,    
 				_l_bpred	= l_bpred,	      
-				_l_decode_width	= l_decode_width):
+				_l_decode_width	= l_decode_width,
+				_l_issue_width	= l_issue_width,
+				_l_fetch_speed 	= l_fetch_speed,
+				_l_imult	= l_imult,
+				_l_ialu		= l_ialu,
+				_l_fpmult	= l_fpmult,
+				_l_fpalu	= l_fpalu,
+				_l_ras		= l_ras,
+				_l_btb_sets	= l_btb_sets,
+				_l_ruusize	= l_ruusize,
+				_l_lsqsize	= l_lsqsize,
+				_l_issue_inorder= l_issue_inorder):
 
 
 	# Check for valid input.
@@ -180,12 +211,23 @@ def config_generator(base_dir, cfg_dir,
 	total_products = len(_l_l1_blocksize)*len(_l_l2_blocksize)*len(_l_l1_assoc)*len(_l_l2_assoc)\
 				*len(_l_bpred)*len(_l_decode_width)
 
-	for product in itertools.product(	_l_l1_blocksize,  	#0 
-						_l_l2_blocksize, 	#1
-						_l_l1_assoc, 		#2
-						_l_l2_assoc, 		#3
-						_l_bpred, 		#4
-						_l_decode_width):	#5
+	for product in itertools.product( _l_l1_blocksize,	#0 
+					_l_l2_blocksize, 	#1
+					_l_l1_assoc, 		#2
+					_l_l2_assoc, 		#3
+					_l_bpred, 		#4
+					_l_decode_width,	#5
+					_l_issue_width,		#6
+					_l_fetch_speed,		#7
+					_l_imult,		#8
+					_l_ialu,		#9
+					_l_fpmult,		#10
+					_l_fpalu,		#11
+					_l_ras,			#12
+					_l_btb_sets,		#13
+					_l_ruusize,		#14
+					_l_lsqsize,		#15
+					_l_issue_inorder):	#16
 		
 		## Get values from product.
 
@@ -198,6 +240,29 @@ def config_generator(base_dir, cfg_dir,
 		l1_size = 1024*8
 		l2_size = 2048*16*2
 
+		bpred = product[4]
+		
+		decode_width = product[5]
+
+		issue_width = product[6]
+
+		fetch_speed = product[7]
+
+		imult = product[8]
+		ialu = product[9]
+		fpmult = product[10]
+		fpalu = product[11]
+		
+		ras = product[12]
+		
+		btb_sets = product[13]
+
+		ruusize = product[14]
+
+		lsqsize = product[15]
+
+		inorder = product[16]
+		
 		
 		## Set values based on values from product.
 		
@@ -248,6 +313,29 @@ def config_generator(base_dir, cfg_dir,
 		if l1_block_size*2 > l2_block_size:
 			continue
 		
+		# decode:width less than or equal to fetch:ifqsize
+		if decode_width > ifq_size:
+			continue
+
+		# imult+ialu <= 2*issue_width (same for fpmult/alu)
+		if imult + ialu > 2*issue_width:
+			continue
+		if fpmult + fpalu > 2*issue_width:
+			continue
+		
+		# ruusize no more than 8 times issue_width
+		if ruusize > 8*issue_width:
+			continue
+
+		# lsqsize no more than 4 times issue_width
+		if lsqsize > 4*issue_width:
+			continue
+
+		# issue widths are 1,2,4 for static, 2,4,8 for dynamic
+		if inorder == "true" and issue_width == 8:
+			continue
+		if inorder == "false" and issue_width == 1:
+			continue
 
 		## Create working set.
 		working_set_dir = cfg_dir + "/tmp/"
@@ -272,8 +360,43 @@ def config_generator(base_dir, cfg_dir,
 		regexes.append(create_setting_change_regex("il2lat", [l2_lat]))
 		regexes.append(create_setting_change_regex("dl2lat", [l2_lat]))
 
+		# bpred
+		regexes.append(create_setting_change_regex("bpred", [bpred]))
+
+		# decode_width
+		regexes.append(create_setting_change_regex("dwidth", [decode_width]))
+
+		# issue_width
+		regexes.append(create_setting_change_regex("iwidth", [issue_width]))
 		
+		# fetch speed
+		regexes.append(create_setting_change_regex("fspeed", [fetch_speed]))
+
+		# resource sizes
+		regexes.append(create_setting_change_regex("imult", [imult]))
+		regexes.append(create_setting_change_regex("ialu", [ialu]))
+		regexes.append(create_setting_change_regex("fpmult", [fpmult]))
+		regexes.append(create_setting_change_regex("fpalu", [fpalu]))
+
+		# ras
+		regexes.append(create_setting_change_regex("ras", [ras]))
+
+		# TODO btb
+
+		
+		#ruusize
+		regexes.append(create_setting_change_regex("ruusize",[ruusize]))
+
+		# lsqsize
+		regexes.append(create_setting_change_regex("lsqsize", [lsqsize]))
+
+		# inorder
+		regexes.append(create_setting_change_regex("inorder", [inorder]))
+		
+
 		## Create a name for the output!
+		# Note: at the moment this is not used, as we no longer redir 
+		#	to file.
 		out_name = str(l1_block_size) + "_" \
 			+ str(l2_block_size) + "_" \
 			+ str(l1_assoc) + "_" \
