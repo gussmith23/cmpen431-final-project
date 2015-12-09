@@ -392,7 +392,6 @@ def config_generator(base_dir, cfg_dir,
 
 		# inorder
 		regexes.append(create_setting_change_regex("inorder", [inorder]))
-		
 
 		## Create a name for the output!
 		# Note: at the moment this is not used, as we no longer redir 
