@@ -65,6 +65,9 @@ l_l2_blocksize 		= [64, 128, 256, 512, 1024]
 l_l1_assoc 		= [1, 2, 4]
 l_l2_assoc		= [1, 2, 4, 8, 16]
 
+l_l1_size		= [8e3, 16e3, 32e3, 64e3]
+l_l2_size		= [64e3, 128e3, 256e3, 512e3, 1024e3]
+
 l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
 
 l_decode_width 		= [1, 2, 4, 8, 16]
@@ -185,7 +188,7 @@ def create_setting_change_regex(name, vals):
 ## MAIN ROUTINE
 
 def config_generator(base_dir, cfg_dir,
-				_l_l1_blocksize = l_l1_blocksize,
+				_l_l1_blocksize = l_l1_blocksize,	# L1/L2 blocksize is in bytes
 				_l_l2_blocksize = l_l2_blocksize,
 				_l_l1_assoc	= l_l1_assoc,   
 				_l_l2_assoc	= l_l2_assoc,    
@@ -203,7 +206,9 @@ def config_generator(base_dir, cfg_dir,
 				_l_lsqsize	= l_lsqsize,
 				_l_issue_inorder= l_issue_inorder,
 				_l_l1_repl	= l_l1_repl,
-				_l_l2_repl	= l_l2_repl):
+				_l_l2_repl	= l_l2_repl,
+				_l_l1_size	= l_l1_size,   #L1 AND L2 are in bytes (so are 8e3, 16e3, etc.)
+				_l_l2_size	= l_l2_size):
 
 
 	# Check for valid input.
@@ -216,7 +221,7 @@ def config_generator(base_dir, cfg_dir,
 				*len(_l_bpred)*len(_l_decode_width)*len(_l_issue_width)*len(_l_fetch_speed)\
 				*len(_l_imult)*len(_l_ialu)*len(_l_fpmult)*len(_l_fpalu)*len(_l_ras)\
 				*len(_l_btb_sets)*len(_l_ruusize)*len(_l_lsqsize)*len(_l_issue_inorder)\
-				*len(_l_l1_repl)*len(_l_l2_repl)
+				*len(_l_l1_repl)*len(_l_l2_repl)*len(_l_l2_size)*len(_l_l1_size)
 
 	products = itertools.product( _l_l1_blocksize,		#0 
 					_l_l2_blocksize, 	#1
@@ -236,7 +241,9 @@ def config_generator(base_dir, cfg_dir,
 					_l_lsqsize,		#15
 					_l_issue_inorder,	#16
 					_l_l1_repl,		#17
-					_l_l2_repl)		#18
+					_l_l2_repl,		#18
+					_l_l1_size,		#19
+					_l_l2_size)		#20
 	
 	print "Generating configs. This takes exponentially longer with each iteration, so the percentage isn't exactly accurate."
 
@@ -255,8 +262,8 @@ def config_generator(base_dir, cfg_dir,
 		l1_assoc = product[2]
 		l2_assoc = product[3]
 
-		l1_size = 1024*8
-		l2_size = 2048*16*2
+		l1_size = product[19]
+		l2_size = product[20]
 
 		bpred = product[4]
 		
@@ -286,37 +293,50 @@ def config_generator(base_dir, cfg_dir,
 		
 		## Set values based on values from product.
 		
+		# Calculate l1/l2 nsets.
+		l1_nsets = (l1_size)/(l1_assoc*l1_block_size)
+		l2_nsets = (l2_size)/(l2_assoc*l2_block_size)
+
 		# ifq size
 		ifq_size = l1_block_size/8
 
 		# l1 latency	
 		l1_lat = 1
-		if l1_block_size == 8:
+		if l1_size == 8e3:
 			l1_lat = 1
-		elif l1_block_size == 16:
+		elif l1_size == 16e3:
 			l1_lat = 2
-		elif l1_block_size == 32:
+		elif l1_size == 32e3:
 			l1_lat = 3
-		elif l1_block_size == 64:
+		elif l1_size == 64e3:
 			l1_lat = 4
+		else:
+			print "invalid l1 size."
+			continue
 		
 		if l1_assoc == 2:
 			l1_lat += 1
 		elif l1_assoc == 4:
 			l1_lat += 2
+		else:
+			print "invalid l1 assoc."
+			continue
 
 		# l2 latency
 		l2_lat = 5
-		if l2_block_size == 64:
+		if l2_size == 64e3:
 			l2_lat = 5
-		elif l2_block_size == 128:
+		elif l2_size == 128e3:
 			l2_lat = 6
-		elif l2_block_size == 256:
+		elif l2_size == 256e3:
 			l2_lat = 7
-		elif l2_block_size == 512:
+		elif l2_size == 512e3:
 			l2_lat = 8
-		elif l2_block_size == 1024:
-			l2_lat = 9	
+		elif l2_size == 1024e3:
+			l2_lat = 9
+		else:
+			print "invalid l2 size."
+			continue
 
 		if l2_assoc == 1:
 			l2_lat += -1
@@ -326,6 +346,9 @@ def config_generator(base_dir, cfg_dir,
 			l2_lat += 2
 		elif l2_assoc == 16:
 			l2_lat += 3
+		else:
+			print "invalid l2 assoc."
+			continue
 
 		# ruusize
 		if ruusize == "max":
@@ -390,9 +413,9 @@ def config_generator(base_dir, cfg_dir,
 		regexes = []
 		
 		# l1, l2.
-		regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,l1_repl))
-		regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,l1_repl))
-		regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,l2_repl))
+		regexes.append(create_cache_change_regex("il1",l1_nsets, l1_block_size,l1_assoc,l1_repl))
+		regexes.append(create_cache_change_regex("dl1",l1_nsets, l1_block_size,l1_assoc,l1_repl))
+		regexes.append(create_cache_change_regex("ul2",l2_nsets, l2_block_size,l2_assoc,l2_repl))
 		
 		# ifq size
 		regexes.append(create_setting_change_regex("ifqsize", [ifq_size]))

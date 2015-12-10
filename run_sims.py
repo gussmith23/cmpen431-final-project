@@ -26,6 +26,11 @@ l_l2_blocksize = [128,256]
 l_l1_assoc = [4]
 l_l2_assoc = [4]
 
+#l_l1_size			= [8e3, 16e3, 32e3, 64e3]
+#l_l2_size			= [64e3, 128e3, 256e3, 512e3, 1024e3]
+l_l1_size			= [8e3, 16e3, 32e3, 64e3]
+l_l2_size			= [64e3, 128e3, 256e3, 512e3, 1024e3]
+
 #l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
 l_bpred = ['2lev', 'bimod']
 
@@ -92,7 +97,9 @@ config_generator(os.getcwd(), "output",
 				_l_lsqsize	= l_lsqsize,
 				_l_issue_inorder= l_issue_inorder,
 				_l_l1_repl	= l_l1_repl,
-				_l_l2_repl	= l_l2_repl)
+				_l_l2_repl	= l_l2_repl,
+				_l_l1_size	= l_l1_size,
+				_l_l2_size	= l_l2_size)
 
 
 
