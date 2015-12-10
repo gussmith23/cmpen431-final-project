@@ -69,7 +69,7 @@ l_issue_inorder = ['false']
 
 #l_l1_repl		= ['l','r']
 #l_l2_repl		= ['l','r']
-l_l1_repl		= ['r']
+l_l1_repl		= ['l','r']
 l_l2_repl		= l_l1_repl
 
 # Note: assumes we're in the root of the project dir!
