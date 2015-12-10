@@ -18,8 +18,8 @@ execfile(os.getcwd() + "/output_parser/output_parser_export.py")
 
 #l_l1_blocksize 		= [8, 16, 32, 64]
 #l_l2_blocksize 		= [64, 128, 256, 512, 1024]
-l_l1_blocksize = [32,64]
-l_l2_blocksize = [256,512,1024]
+l_l1_blocksize = [64]
+l_l2_blocksize = [128,256]
 
 #l_l1_assoc 		= [1, 2, 4]
 #l_l2_assoc		= [1, 2, 4, 8, 16]
@@ -27,7 +27,7 @@ l_l1_assoc = [4]
 l_l2_assoc = [4]
 
 #l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
-l_bpred = ['2lev']
+l_bpred = ['2lev', 'bimod']
 
 #l_decode_width 		= [1, 2, 4, 8, 16]
 l_decode_width = [4]
@@ -65,11 +65,11 @@ l_ruusize = ["max"]
 l_lsqsize = ["max"]
 
 #l_issue_inorder 	= ['true', 'false']
-l_issue_inorder = ['true','false']
+l_issue_inorder = ['false']
 
 #l_l1_repl		= ['l','r']
 #l_l2_repl		= ['l','r']
-l_l1_repl		= ['l']
+l_l1_repl		= ['r']
 l_l2_repl		= l_l1_repl
 
 # Note: assumes we're in the root of the project dir!
