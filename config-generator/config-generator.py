@@ -65,8 +65,8 @@ l_l2_blocksize 		= [64, 128, 256, 512, 1024]
 l_l1_assoc 		= [1, 2, 4]
 l_l2_assoc		= [1, 2, 4, 8, 16]
 
-l_l1_size		= [8e3, 16e3, 32e3, 64e3]
-l_l2_size		= [64e3, 128e3, 256e3, 512e3, 1024e3]
+l_l1_size		= [8, 16, 32, 64]
+l_l2_size		= [64, 128, 256, 512, 1024]
 
 l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
 
@@ -207,7 +207,7 @@ def config_generator(base_dir, cfg_dir,
 				_l_issue_inorder= l_issue_inorder,
 				_l_l1_repl	= l_l1_repl,
 				_l_l2_repl	= l_l2_repl,
-				_l_l1_size	= l_l1_size,   #L1 AND L2 are in bytes (so are 8e3, 16e3, etc.)
+				_l_l1_size	= l_l1_size,   #L1 AND L2 are in kilobytes
 				_l_l2_size	= l_l2_size):
 
 
@@ -294,21 +294,21 @@ def config_generator(base_dir, cfg_dir,
 		## Set values based on values from product.
 		
 		# Calculate l1/l2 nsets.
-		l1_nsets = (l1_size)/(l1_assoc*l1_block_size)
-		l2_nsets = (l2_size)/(l2_assoc*l2_block_size)
+		l1_nsets = int( (l1_size*1024)/(l1_assoc*l1_block_size) )
+		l2_nsets = int( (l2_size*1024)/(l2_assoc*l2_block_size) )
 
 		# ifq size
 		ifq_size = l1_block_size/8
 
 		# l1 latency	
 		l1_lat = 1
-		if l1_size == 8e3:
+		if l1_size == 8:
 			l1_lat = 1
-		elif l1_size == 16e3:
+		elif l1_size == 16:
 			l1_lat = 2
-		elif l1_size == 32e3:
+		elif l1_size == 32:
 			l1_lat = 3
-		elif l1_size == 64e3:
+		elif l1_size == 64:
 			l1_lat = 4
 		else:
 			print "invalid l1 size."
@@ -324,15 +324,15 @@ def config_generator(base_dir, cfg_dir,
 
 		# l2 latency
 		l2_lat = 5
-		if l2_size == 64e3:
+		if l2_size == 64:
 			l2_lat = 5
-		elif l2_size == 128e3:
+		elif l2_size == 128:
 			l2_lat = 6
-		elif l2_size == 256e3:
+		elif l2_size == 256:
 			l2_lat = 7
-		elif l2_size == 512e3:
+		elif l2_size == 512:
 			l2_lat = 8
-		elif l2_size == 1024e3:
+		elif l2_size == 1024:
 			l2_lat = 9
 		else:
 			print "invalid l2 size."
@@ -369,6 +369,14 @@ def config_generator(base_dir, cfg_dir,
 			fpalu = issue_width
 
 		## Check values.
+
+		if not ( ((l1_nsets & (l1_nsets-1)) == 0) and l1_nsets > 0 ):
+			print "l1_nsets not a power of 2. continuing..."
+			continue
+		
+		if not ( ((l2_nsets & (l2_nsets-1)) == 0) and l2_nsets > 0 ):
+			print "l2_nsets not a power of 2. continuing..."
+			continue
 
 		if l1_block_size*2 > l2_block_size:
 			print "Invalid cfg: l1_block_size*2 > l2_block_size. Continuing..."
