@@ -47,10 +47,18 @@ def parse_output(lines, fields):
 		result = filter(lambda line: field in line, lines)[0]
 		
 		# parse value out.
-		if field == "cache:dl1" or field == "cache:dl2" or field == "cache:il1" or field == "cache:il2":
+		if field == "tlb:dtlb" or field == "tlb:itlb" or field == "cache:dl1" or field == "cache:dl2" or field == "cache:il1" or field == "cache:il2":
 			val = cache_parser.search(result)
 			if val is not None:
 				val = val.group().strip()
+				
+				# further break up cache settings...
+				cache_settings = val.split(":")
+
+				return_dict[field+"_nsets"] = cache_settings[0]
+				return_dict[field+"_bsize"] = cache_settings[1]
+				return_dict[field+"_assoc"] = cache_settings[2]
+				return_dict[field+"_repl"]  = cache_settings[3]
 			else:
 				val = "not found"
 		elif field == "bpred ": #note the space.

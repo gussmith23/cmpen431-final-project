@@ -52,7 +52,13 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
                         "cache:il1lat",
                         "cache:il2",
 			"cache:il2lat",
-			]
+			"res:ialu",
+			"res:imult",
+			"res:fpalu",
+			"res:fpmult",
+			"tlb:itlb",
+			"tlb:dtlb",
+			"mem:width"]
 
 	# The list of results from each machine.
 	sim_list = []
@@ -123,6 +129,14 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 			# We shouldn't do this every iteration of this loop; we only need to do it once.
 			for setting in settings:
 				sim_list_entry[setting] = parsed_output[setting]
+				
+				# get additional entries for cache settings.
+				if setting in ["tlb:itlb","tlb:dtlb","cache:dl1","cache:dl2","cache:il1","cache:il2"] and parsed_output[setting] != "not found":
+					sim_list_entry[setting+"_nsets"] = parsed_output[setting+"_nsets"]
+					sim_list_entry[setting+"_bsize"] = parsed_output[setting+"_bsize"]
+					sim_list_entry[setting+"_assoc"] = parsed_output[setting+"_assoc"]
+					sim_list_entry[setting+"_repl"] = parsed_output[setting+"_repl"]
+					
 
 			# For each machine, we need to keep track of milc/mcf data (so graders can check validity)
 			if benchmark_name is "milc" or benchmark_name is "mcf":
