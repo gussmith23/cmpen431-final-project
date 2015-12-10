@@ -90,6 +90,8 @@ l_lsqsize		= [2, 4, 8, 16, 32]
 
 l_issue_inorder 	= ['true', 'false']
 
+l_l1_repl		= ['r','l']
+l_l2_repl		= l_l1_repl
 
 ########################
 ## FUNCTIONS
@@ -199,7 +201,9 @@ def config_generator(base_dir, cfg_dir,
 				_l_btb_sets	= l_btb_sets,
 				_l_ruusize	= l_ruusize,
 				_l_lsqsize	= l_lsqsize,
-				_l_issue_inorder= l_issue_inorder):
+				_l_issue_inorder= l_issue_inorder,
+				_l_l1_repl	= l_l1_repl,
+				_l_l2_repl	= l_l2_repl):
 
 
 	# Check for valid input.
@@ -211,7 +215,8 @@ def config_generator(base_dir, cfg_dir,
 	total_products = len(_l_l1_blocksize)*len(_l_l2_blocksize)*len(_l_l1_assoc)*len(_l_l2_assoc)\
 				*len(_l_bpred)*len(_l_decode_width)*len(_l_issue_width)*len(_l_fetch_speed)\
 				*len(_l_imult)*len(_l_ialu)*len(_l_fpmult)*len(_l_fpalu)*len(_l_ras)\
-				*len(_l_btb_sets)*len(_l_ruusize)*len(_l_lsqsize)*len(_l_issue_inorder)
+				*len(_l_btb_sets)*len(_l_ruusize)*len(_l_lsqsize)*len(_l_issue_inorder)\
+				*len(_l_l1_repl)*len(_l_l2_repl)
 
 	products = itertools.product( _l_l1_blocksize,		#0 
 					_l_l2_blocksize, 	#1
@@ -229,7 +234,9 @@ def config_generator(base_dir, cfg_dir,
 					_l_btb_sets,		#13
 					_l_ruusize,		#14
 					_l_lsqsize,		#15
-					_l_issue_inorder)	#16
+					_l_issue_inorder,	#16
+					_l_l1_repl,		#17
+					_l_l2_repl)		#18
 	
 	print "Generating configs. This takes exponentially longer with each iteration, so the percentage isn't exactly accurate."
 
@@ -274,6 +281,8 @@ def config_generator(base_dir, cfg_dir,
 
 		inorder = product[16]
 		
+		l1_repl = product[17]
+		l2_repl = product[18]
 		
 		## Set values based on values from product.
 		
@@ -318,6 +327,23 @@ def config_generator(base_dir, cfg_dir,
 		elif l2_assoc == 16:
 			l2_lat += 3
 
+		# ruusize
+		if ruusize == "max":
+			ruusize = 8*issue_width
+
+		# lsqsize
+		if lsqsize == "max":
+			lsqsize = 4*issue_width
+
+		# imult,ialu,fpalu,fpmult.
+		if imult == "max":
+			imult = issue_width
+		if ialu == "max":
+			ialu = issue_width
+		if fpmult == "max":
+			fpmult = issue_width
+		if fpalu == "max":
+			fpalu = issue_width
 
 		## Check values.
 
@@ -326,7 +352,7 @@ def config_generator(base_dir, cfg_dir,
 			continue
 		
 		# decode:width less than or equal to fetch:ifqsize
-		if decode_width > ifq_size:
+		if decode_width > ifq_size*8: # ifq_size is in words, so convert to bytes.
 			print "Invalid cfg: decode_width > ifq_size. Continuing..."
 			continue
 
@@ -364,9 +390,9 @@ def config_generator(base_dir, cfg_dir,
 		regexes = []
 		
 		# l1, l2.
-		regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
-		regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,"r"))
-		regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,"r"))
+		regexes.append(create_cache_change_regex("il1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,l1_repl))
+		regexes.append(create_cache_change_regex("dl1",l1_size/(l1_block_size*l1_assoc), l1_block_size,l1_assoc,l1_repl))
+		regexes.append(create_cache_change_regex("ul2",l2_size/(l2_block_size*l2_assoc), l2_block_size,l2_assoc,l2_repl))
 		
 		# ifq size
 		regexes.append(create_setting_change_regex("ifqsize", [ifq_size]))
