@@ -79,6 +79,7 @@ l_l2_repl		= l_l1_repl
 
 # Note: assumes we're in the root of the project dir!
 config_generator(os.getcwd(), "output", 
+				doubling = False,
 				_l_l1_blocksize = l_l1_blocksize,
 				_l_l2_blocksize = l_l2_blocksize,
 				_l_l1_assoc	= l_l1_assoc,   

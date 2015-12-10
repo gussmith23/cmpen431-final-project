@@ -187,7 +187,8 @@ def create_setting_change_regex(name, vals):
 #######################
 ## MAIN ROUTINE
 
-def config_generator(base_dir, cfg_dir,
+def config_generator(base_dir, cfg_dir, 
+				doubling = True, #
 				_l_l1_blocksize = l_l1_blocksize,	# L1/L2 blocksize is in bytes
 				_l_l2_blocksize = l_l2_blocksize,
 				_l_l1_assoc	= l_l1_assoc,   
@@ -485,5 +486,14 @@ def config_generator(base_dir, cfg_dir,
 
 
 		## Merge.
-		merge_working_set(base_dir, cfg_dir, working_set_dir)
+		if doubling == True:
+			merge_working_set(base_dir, cfg_dir, working_set_dir)
+		else:
+			# Move all configs to a destination where they won't be copied again 
+			# the next time a new working set is created.
+			merge_working_set(base_dir, cfg_dir + "/new_cfgs", working_set_dir)
+	
 
+	# We have to move everything again, in this case
+	if doubling == False:
+		merge_working_set(base_dir, cfg_dir, cfg_dir+ "/new_cfgs")
