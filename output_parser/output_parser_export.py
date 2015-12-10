@@ -15,7 +15,9 @@ def parse_output(lines, fields):
 	return_dict = {}
 
 	# Create needed regex parsers.
-	value_parser = re.compile("[0-9.]+|true|false")
+	value_parser = re.compile("[0-9.]+|true|false|bimod|2lev")
+	cache_parser = re.compile("[0-9]+:[0-9]+:[0-9]+:[a-z]+")
+	bpred_parser = re.compile("bimod|2lev")
 
 	# These are the basic fields that we MUST have. additional fields can be in fields list.
 	if "issue:width" not in fields: fields.append("issue:width")
@@ -43,7 +45,18 @@ def parse_output(lines, fields):
 	for field in fields:
 		
 		result = filter(lambda line: field in line, lines)[0]
-		val = value_parser.search(result).group().strip()
+		
+		# parse value out.
+		if field == "cache:dl1" or field == "cache:dl2" or field == "cache:il1" or field == "cache:il2":
+			val = cache_parser.search(result)
+			if val is not None:
+				val = val.group().strip()
+			else:
+				val = "not found"
+		elif field == "bpred ": #note the space.
+			val = bpred_parser.search(result).group().strip()
+		else:
+			val = value_parser.search(result).group().strip()
 		
 		# put the value in our return val.
 		return_string += "," + str(val)

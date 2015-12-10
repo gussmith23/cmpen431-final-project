@@ -66,12 +66,14 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 
 	# this is the DictWriter writing into the output_csv file.
 	dict_writer = 0 # initialized after first iteration.
-
+	
+	# Counter
+	configs_completed = 0
 
 	for config_to_run in onlyfiles:
 		
 		# Print
-		print 'Running config {0}:'.format(config_to_run)
+		print '[{1}%] Running config {0}:'.format(config_to_run, 100.0*(float(1+configs_completed)/float(len(onlyfiles))))
 		
 		# collect float and int execution times so we can calculate geometric means.
 		int_exec_time = []
@@ -163,3 +165,5 @@ def simulation_runner(base_dir, cfg_dir, dest_dir):
 
 		# writerow to .csv.
 		dict_writer.writerow(sim_list_entry)
+
+		configs_completed += 1

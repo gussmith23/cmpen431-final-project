@@ -209,9 +209,11 @@ def config_generator(base_dir, cfg_dir,
 
 	product_counter = 0
 	total_products = len(_l_l1_blocksize)*len(_l_l2_blocksize)*len(_l_l1_assoc)*len(_l_l2_assoc)\
-				*len(_l_bpred)*len(_l_decode_width)
+				*len(_l_bpred)*len(_l_decode_width)*len(_l_issue_width)*len(_l_fetch_speed)\
+				*len(_l_imult)*len(_l_ialu)*len(_l_fpmult)*len(_l_fpalu)*len(_l_ras)\
+				*len(_l_btb_sets)*len(_l_ruusize)*len(_l_lsqsize)*len(_l_issue_inorder)
 
-	for product in itertools.product( _l_l1_blocksize,	#0 
+	products = itertools.product( _l_l1_blocksize,		#0 
 					_l_l2_blocksize, 	#1
 					_l_l1_assoc, 		#2
 					_l_l2_assoc, 		#3
@@ -227,8 +229,17 @@ def config_generator(base_dir, cfg_dir,
 					_l_btb_sets,		#13
 					_l_ruusize,		#14
 					_l_lsqsize,		#15
-					_l_issue_inorder):	#16
+					_l_issue_inorder)	#16
+	
+	print "Generating configs. This takes exponentially longer with each iteration, so the percentage isn't exactly accurate."
+
+	for product in products:
 		
+		## Update product counter.
+		product_counter += 1
+
+		print "[{0}%]".format(100.0*float(product_counter)/float(total_products))
+
 		## Get values from product.
 
 		l1_block_size = product[0]
@@ -418,8 +429,4 @@ def config_generator(base_dir, cfg_dir,
 
 		## Merge.
 		merge_working_set(base_dir, cfg_dir, working_set_dir)
-
-		## Update product counter.
-		product_counter += 1
-		print("Progress: [" + str(product_counter) + "/" + str(total_products) + "]")
 
