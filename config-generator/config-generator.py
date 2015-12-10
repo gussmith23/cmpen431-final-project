@@ -246,7 +246,10 @@ def config_generator(base_dir, cfg_dir,
 					_l_l1_size,		#19
 					_l_l2_size)		#20
 	
-	print "Generating configs. This takes exponentially longer with each iteration, so the percentage isn't exactly accurate."
+	if doubling == True:
+		print "Generating configs. This takes exponentially longer with each iteration, so the percentage isn't exactly accurate."
+	else:
+		print "Generating configs..."
 
 	for product in products:
 		
