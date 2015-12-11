@@ -28,18 +28,18 @@ l_l2_assoc = [1,2,4,8,16]
 
 #l_l1_size			= [8, 16, 32, 64]
 #l_l2_size			= [64, 128, 256, 512, 1024] THESE ARE KILOBYTES!
-l_l1_size			= [8,16,32,64]
-l_l2_size			= [64,128,256,512,1024]
+l_l1_size			= [16,64]
+l_l2_size			= [64,256,1024]
 
 #l_bpred			= ['bimod', 'taken', 'nottaken', '2lev']
 l_bpred = ['bimod']
 
 #l_decode_width 		= [1, 2, 4, 8, 16]
-l_decode_width = [1,4,16]
+l_decode_width = [4]
 
 # Note: issue width for static is 1,2,4; for dynamic is 2,4,8.
 #l_issue_width		= [1, 2, 4, 8]
-l_issue_width = [4,8]
+l_issue_width = [4]
 
 # Fetch speed ratios - this should probably always be 4
 #l_fetch_speed		= [1,2,3,4]
