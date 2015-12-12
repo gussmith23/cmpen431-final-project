@@ -18,17 +18,17 @@ execfile(os.getcwd() + "/output_parser/output_parser_export.py")
 
 #l_l1_blocksize 		= [8, 16, 32, 64]
 #l_l2_blocksize 		= [64, 128, 256, 512, 1024]
-l_l1_blocksize = [32,64]
-l_l2_blocksize = [128,256]
+l_l1_blocksize = [64]
+l_l2_blocksize = [256]
 
 #l_l1_assoc 		= [1, 2, 4]
 #l_l2_assoc		= [1, 2, 4, 8, 16]
 l_l1_assoc = [2]
-l_l2_assoc = [4,8]
+l_l2_assoc = [4]
 
 #l_l1_repl		= ['l','r']
 #l_l2_repl		= ['l','r']
-l_l1_repl		= ['l','r']
+l_l1_repl		= ['l']
 l_l2_repl		= l_l1_repl
 
 #l_l1_size			= [8, 16, 32, 64]
@@ -40,11 +40,11 @@ l_l2_size			= [1024]
 l_bpred = ['bimod', '2lev']
 
 #l_decode_width 		= [1, 2, 4, 8, 16]
-l_decode_width = [2,4,8]
+l_decode_width = [1,2,4,8,16]
 
 # Note: issue width for static is 1,2,4; for dynamic is 2,4,8.
 #l_issue_width		= [1, 2, 4, 8]
-l_issue_width = [4]
+l_issue_width = [1,2,4,8]
 
 # Fetch speed ratios - this should probably always be 4
 #l_fetch_speed		= [1,2,3,4]
@@ -75,7 +75,7 @@ l_ruusize = ["max"]
 l_lsqsize = ["max"]
 
 #l_issue_inorder 	= ['true', 'false']
-l_issue_inorder = ['false','true']
+l_issue_inorder = ['false']
 
 
 
